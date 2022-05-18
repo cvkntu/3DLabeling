@@ -117,7 +117,7 @@ def draw_3d_labels(I, calib_data, label_data):
     for label in label_data:
         points, edges = get_3D_cuboid_graph(label)
 
-        points2d = calib_data.P2 @ np.vstack((points, np.ones((1,8))))
+        points2d = calib_data.P0 @ np.vstack((points, np.ones((1,8))))
         points2d = points2d[:2] / points2d[[2]]
         points2d = points2d.T
 

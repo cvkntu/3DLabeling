@@ -35,13 +35,13 @@ def test_dataset(calib_dir, image_dir, label_dir):
         
         
 if __name__ == '__main__':
-    # calib_dir = 'data_object_calib/training/calib'
-    # image_dir = 'data_object_image_2/training/image_2'
-    # label_dir = 'data_object_label_2/training/label_2'
+    calib_dir = 'data_object_calib/training/calib'
+    image_dir = 'data_object_image_2/training/image_2'
+    label_dir = 'data_object_label_2/training/label_2'
 
-    calib_dir = 'sample_calib'
-    image_dir = 'sample_image_2'
-    label_dir = 'sample_label_2'
+    # calib_dir = 'sample_calib'
+    # image_dir = 'sample_image_2'
+    # label_dir = 'sample_label_2'
 
     test_dataset(calib_dir, image_dir, label_dir)
 
