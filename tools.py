@@ -104,9 +104,20 @@ def get_3D_cuboid_graph(label):
     return points, edges
                       
     
+
+def find_vehicle_to_camera_pose(calib_data, label):
+    """returns the calibration matrix and the relative
+    rotation+translation taking a 3D point from the vehicle coordinate
+    systems to the camera (P2) coordiate system
+    """
+    P = calib_data.P2
+    K = P[:,:3]
+    R = label.R
+    t = label.t + np.reshape(np.linalg.inv(K) @ P[:,3], (-1,1))
+
+    return K,R,t
+
     
-    
-                         
     
     
         
@@ -117,7 +128,10 @@ def draw_3d_labels(I, calib_data, label_data):
     for label in label_data:
         points, edges = get_3D_cuboid_graph(label)
 
-        points2d = calib_data.P0 @ np.vstack((points, np.ones((1,8))))
+        
+        K,R,t = find_vehicle_to_camera_pose(calib_data, label)
+        
+        points2d = calib_data.P2 @ np.vstack((points, np.ones((1,8))))
         points2d = points2d[:2] / points2d[[2]]
         points2d = points2d.T
 
