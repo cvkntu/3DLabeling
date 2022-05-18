@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+import cv2 as cv
 
 
 @dataclass
@@ -47,15 +48,104 @@ class Kitti3DLabelData:
                            [ 0,  1, 0],
                            [-s,  0, c]])
 
+        # since vehicle coordiante is
+        # x: pointing forward (towards front of the vehicle)
+        # y: pointing left
+        # z: pointing up
+        self.R = self.R @ np.array([[1, 0, 0],
+                                    [0, 0, -1],
+                                    [0, 1, 0]])
+
+        
+
         self.t = self.location.reshape((-1,1))
 
         self.Rt = np.hstack((self.R,self.t))
 
 
 
+@dataclass
+class Cuboid:
+    points: np.ndarray
+    
+
+
+
+def get_3D_cuboid_graph(label):
+    "creates 3D cuboid points in the camera coordiante system and their graph"
+    w,h,l = label.w, label.h, label.l
+
+    # x_corners = [l/2, l/2, -l/2, -l/2, l/2, l/2, -l/2, -l/2];
+    # y_corners = [0,0,0,0,-h,-h,-h,-h];
+    # z_corners = [w/2, -w/2, -w/2, w/2, w/2, -w/2, -w/2, w/2];
+    
+    
+    x_coords = np.array([ l/2,  l/2, -l/2, -l/2,  l/2,  l/2, -l/2, -l/2])
+    y_coords = np.array([ w/2, -w/2,  w/2, -w/2,  w/2, -w/2,  w/2, -w/2])
+    z_coords = np.array([   0,    0,   0,    0,   h,    h,      h,    h])
+
+    points = np.vstack((x_coords, y_coords, z_coords))
+    points = label.R @ points + label.t
+
+    
+    edges = np.array([[0,1],
+                      [0,2],
+                      [1,3],
+                      [2,3],
+                      [0,4],
+                      [1,5],
+                      [2,6],
+                      [3,7],
+                      [4,5],
+                      [4,6],
+                      [5,7],
+                      [6,7]])
+
+    return points, edges
+                      
+    
+    
+    
+                         
+    
+    
+        
 
 def draw_3d_labels(I, calib_data, label_data):
     "Draw 3D bounding boxes on image"
+
+    for label in label_data:
+        points, edges = get_3D_cuboid_graph(label)
+
+        points2d = calib_data.P2 @ np.vstack((points, np.ones((1,8))))
+        points2d = points2d[:2] / points2d[[2]]
+        points2d = points2d.T
+
+        radius = 4
+        color = (255, 0, 0)
+        thickness = -2
+        for p in points2d:
+            
+            I = cv.circle(I, p.astype(np.int64), radius, color, thickness)
+            
+        
+        color = (0, 0, 255)
+        thickness = 1
+
+        for i,j in edges:
+            pi = points2d[i].astype(np.int64)
+            pj = points2d[j].astype(np.int64)
+
+            cv.line(I, pi, pj, color, thickness)
+            
+            
+
+        
+
+    
+    
+
+    
 
 def read_3d_label_file(label_file):
     """

@@ -27,7 +27,8 @@ def test_dataset(calib_dir, image_dir, label_dir):
         
 
         cv.imshow('3D Labels', I)
-        cv.waitKey()
+        if (cv.waitKey() & 0xFF == ord('q')):
+            exit()
 
         
 
