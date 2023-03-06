@@ -130,8 +130,8 @@ def draw_3d_labels(I, calib_data, label_data):
 
         
         K,R,t = find_vehicle_to_camera_pose(calib_data, label)
-        
-        points2d = calib_data.P2 @ np.vstack((points, np.ones((1,8))))
+        P = K @ np.hstack((R, t))
+        points2d = P @ np.vstack((points, np.ones((1, 8))))
         points2d = points2d[:2] / points2d[[2]]
         points2d = points2d.T
 
